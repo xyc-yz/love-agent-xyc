@@ -9,18 +9,11 @@ import reactor.core.publisher.Flux;
 
 @RestController
 public class HealthController {
-    @Resource
-    private ChatClient chatClient;
+
     @GetMapping("/health")
     public String health() {
         return "ok，ok";
     }
 
-    @RequestMapping("/chat")
-    public Flux<String> index() {
-        return chatClient.prompt()
-                .user("你好,你是谁")
-                .stream()
-                .content();
-    }
+
 }
