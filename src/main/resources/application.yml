@@ -4,7 +4,7 @@ spring:
       api-key: ${ALIBABA_API_KEY}
       chat:
         options:
-          model: qwen-turbo
+          model: qwen-plus
           temperature: 0.8
           enable-search: true
           search-strategy: agent
