@@ -1,6 +1,13 @@
 spring:
-  application:
-    name: love-agent-xyc
+  ai:
+    dashscope:
+      api-key: ${ALIBABA_API_KEY}
+      chat:
+        options:
+          model: qwen-turbo
+          temperature: 0.8
+          enable-search: true
+          search-strategy: agent
 # springdoc-openapi ??????
 springdoc:
   swagger-ui:
