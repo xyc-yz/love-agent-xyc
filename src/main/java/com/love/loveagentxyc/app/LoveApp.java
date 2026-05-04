@@ -1,6 +1,6 @@
 package com.love.loveagentxyc.app;
 
-import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
+import com.love.loveagentxyc.advisor.LogAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -32,7 +32,8 @@ public class LoveApp {
         this.chatClient = ChatClient.builder(dashScopeChatModel)
                 // 自动注册会话记忆增强器，无需手动new MessageChatMemoryAdvisor
                 .defaultAdvisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+                        MessageChatMemoryAdvisor.builder(chatMemory).build(),
+                        new LogAdvisor()
                 )
                 // 你的系统提示词
                 .defaultSystem(SYSTEM_PROMPT)
@@ -48,7 +49,6 @@ public class LoveApp {
              String text ;
         if (chatResponse != null) {
             text = chatResponse.getResult().getOutput().getText();
-            log.info("响应结果：{}", text);
             return text;
         }
         return "我无法理解你的问题，请重新提问";
