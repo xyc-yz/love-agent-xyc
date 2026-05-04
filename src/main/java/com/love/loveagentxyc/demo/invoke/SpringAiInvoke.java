@@ -32,7 +32,7 @@ public class SpringAiInvoke implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         List<Message> prompt = new ArrayList<>();
-        SystemMessage systemMessage = new SystemMessage("你是一个的ai助手");
+        SystemMessage systemMessage = new SystemMessage("你是一个的ai助手，叫鱼皮");
         prompt.add(systemMessage);
         UserMessage userMessage = new UserMessage("你好,我是肖有财，你是谁");
         prompt.add(userMessage);

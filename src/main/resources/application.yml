@@ -6,8 +6,9 @@ spring:
         options:
           model: qwen-plus
           temperature: 0.8
-          enable-search: true
-          search-strategy: agent
+#          multi-model: true
+#          enable-search: true
+#          search-strategy: agent
 # springdoc-openapi ??????
 springdoc:
   swagger-ui:
