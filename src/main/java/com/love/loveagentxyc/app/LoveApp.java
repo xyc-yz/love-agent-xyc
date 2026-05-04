@@ -9,7 +9,7 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
+
 
 @Component
 @Slf4j
@@ -43,8 +43,11 @@ public class LoveApp {
                .advisors(advisor -> advisor.param(ChatMemory.CONVERSATION_ID, chatId))
                .call()
                .chatResponse();
+             String text ;
         if (chatResponse != null) {
-            return chatResponse.getResult().getOutput().getText();
+            text = chatResponse.getResult().getOutput().getText();
+            log.info("响应结果：{}", text);
+            return text;
         }
         return "我无法理解你的问题，请重新提问";
     }
