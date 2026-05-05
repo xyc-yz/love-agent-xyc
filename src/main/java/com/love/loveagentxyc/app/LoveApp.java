@@ -1,6 +1,7 @@
 package com.love.loveagentxyc.app;
 
 import com.love.loveagentxyc.advisor.LogAdvisor;
+import com.love.loveagentxyc.advisor.ReReadingAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -32,6 +33,7 @@ public class LoveApp {
         this.chatClient = ChatClient.builder(dashScopeChatModel)
                 // 自动注册会话记忆增强器，无需手动new MessageChatMemoryAdvisor
                 .defaultAdvisors(
+                        new ReReadingAdvisor(),
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
                         new LogAdvisor()
                 )
