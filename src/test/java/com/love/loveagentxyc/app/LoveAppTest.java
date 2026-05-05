@@ -3,6 +3,7 @@ package com.love.loveagentxyc.app;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.UUID;
@@ -30,6 +31,16 @@ class LoveAppTest {
         result = loveApp.doChat(message , chatId);
 //        System.out.println(result);
         System.out.println("=============================================================================");
+
+    }
+
+    @Test
+    void doChatReport() {
+        String chatId = UUID.randomUUID().toString();
+        //第一轮
+        String message = "我叫肖有财，单身，想找对象，我不知道该怎么做";
+        LoveApp.LoveReport loveReport = loveApp.doChatReport(message, chatId);
+
 
     }
 }

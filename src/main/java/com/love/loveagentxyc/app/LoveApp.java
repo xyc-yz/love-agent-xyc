@@ -12,6 +12,8 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 
 @Component
 @Slf4j
@@ -43,16 +45,30 @@ public class LoveApp {
     }
 
     public String doChat(String message, String chatId) {
-     ChatResponse chatResponse = chatClient.prompt()
-               .user( message)
-               .advisors(advisor -> advisor.param(ChatMemory.CONVERSATION_ID, chatId))
-               .call()
-               .chatResponse();
-             String text ;
+        ChatResponse chatResponse = chatClient.prompt()
+                .user(message)
+                .advisors(advisor -> advisor.param(ChatMemory.CONVERSATION_ID, chatId))
+                .call()
+                .chatResponse();
+        String text;
         if (chatResponse != null) {
             text = chatResponse.getResult().getOutput().getText();
             return text;
         }
         return "我无法理解你的问题，请重新提问";
+    }
+
+
+    record LoveReport(String title, List<String> suggestions) {
+    }
+
+    public LoveReport doChatReport(String message, String chatId) {
+        LoveReport report = chatClient.prompt()
+                .user(message)
+                .advisors(advisor -> advisor.param(ChatMemory.CONVERSATION_ID, chatId))
+                .call()
+                .entity(LoveReport.class);
+        log.info("LoveReport: {}", report);
+        return report;
     }
 }
