@@ -2,9 +2,11 @@ package com.love.loveagentxyc.app;
 
 import com.love.loveagentxyc.advisor.LogAdvisor;
 import com.love.loveagentxyc.advisor.ReReadingAdvisor;
+import com.love.loveagentxyc.rag.LoveAppVectorStoreConfig;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
@@ -12,6 +14,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.memory.repository.mongo.MongoChatMemoryRepository;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +48,7 @@ public class LoveApp {
                         new ReReadingAdvisor(),
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
                         new LogAdvisor()
+
                 )
                 // 你的系统提示词
                 .defaultSystem(SYSTEM_PROMPT)
@@ -77,5 +81,23 @@ public class LoveApp {
                 .entity(LoveReport.class);
         log.info("LoveReport: {}", report);
         return report;
+    }
+
+    @Resource
+    private VectorStore loveAppVectorStore;
+
+    public String doRAGChat(String message, String chatId) {
+        ChatResponse chatResponse = chatClient.prompt("给我解决方案，并推荐课程")
+                .user(message)
+                .advisors(advisor -> advisor.param(ChatMemory.CONVERSATION_ID, chatId))
+                .advisors(QuestionAnswerAdvisor.builder(loveAppVectorStore).build())
+                .call()
+                .chatResponse();
+        String text;
+        if (chatResponse != null) {
+            text = chatResponse.getResult().getOutput().getText();
+            return text;
+        }
+        return "我无法理解你的问题，请重新提问";
     }
 }
