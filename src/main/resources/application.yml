@@ -14,7 +14,7 @@ spring:
         options:
           model: qwen-plus
           temperature: 0.8
-#          multi-model: true
+#          multi-model: true  多模态
 #          enable-search: true
 #          search-strategy: agent
 # springdoc-openapi ??????
