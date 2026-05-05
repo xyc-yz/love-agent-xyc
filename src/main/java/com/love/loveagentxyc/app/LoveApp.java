@@ -2,13 +2,17 @@ package com.love.loveagentxyc.app;
 
 import com.love.loveagentxyc.advisor.LogAdvisor;
 import com.love.loveagentxyc.advisor.ReReadingAdvisor;
+import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.memory.repository.mongo.MongoChatMemoryRepository;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,11 +28,14 @@ public class LoveApp {
             "围绕单身、恋爱、已婚三种状态提问：单身状态询问社交圈拓展及追求心仪对象的困扰；恋爱状态询问沟通、习惯差异引发的矛盾；" +
             "已婚状态询问家庭责任与亲属关系处理的问题。引导用户详述事情经过、对方反应及自身想法，以便给出专属解决方案。";
 
-    public LoveApp(ChatModel dashScopeChatModel) {
-        InMemoryChatMemoryRepository repository = new InMemoryChatMemoryRepository();
+    public LoveApp(ChatModel dashScopeChatModel, MongoChatMemoryRepository mongoChatMemoryRepository) {
+//        InMemoryChatMemoryRepository repository = new InMemoryChatMemoryRepository();
+//        ChatMemoryRepository mongoChatMemoryRepository = MongoChatMemoryRepository.builder()
+//                .mongoTemplate(mongoTemplate)
+//                .build();
         ChatMemory chatMemory = MessageWindowChatMemory.builder()
-                // 指定存储层：内存存储（重启丢失）
-                .chatMemoryRepository(repository)
+                // 指定存储层：MongoDB
+                .chatMemoryRepository(mongoChatMemoryRepository)
                 // 可选：设置最多保留10条消息（默认20条）
                 .maxMessages(10)
                 .build();

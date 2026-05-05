@@ -1,5 +1,13 @@
 spring:
+  data:
+    mongodb:
+     uri: mongodb://localhost:27017/love-agent-memory
   ai:
+    chat:
+      memory:
+        repository:
+          mongodb:  # 这里必须是 mongodb，不是 mongo！
+            collection-name: love-agent-memory  # 你的自定义集合名
     dashscope:
       api-key: ${ALIBABA_API_KEY}
       chat:
