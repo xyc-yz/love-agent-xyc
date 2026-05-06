@@ -1,4 +1,8 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/love_ai
+    username: postgres
+    password: 123456
   data:
     mongodb:
      uri: mongodb://localhost:27017/love-agent-memory
