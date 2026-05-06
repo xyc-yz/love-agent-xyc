@@ -57,6 +57,9 @@ public class LoveApp {
                 .defaultSystem(SYSTEM_PROMPT)
                 .build();
     }
+    /**
+     * 聊天
+     */
 
     public String doChat(String message, String chatId) {
         ChatResponse chatResponse = chatClient.prompt()
@@ -72,7 +75,9 @@ public class LoveApp {
         return "我无法理解你的问题，请重新提问";
     }
 
-
+    /**
+     * 聊天报告
+     */
     record LoveReport(String title, List<String> suggestions) {
     }
 
@@ -88,6 +93,13 @@ public class LoveApp {
 
     @Resource
     private VectorStore loveAppVectorStore;
+
+    /**
+     *  检索增强
+     * @param message
+     * @param chatId
+     * @return
+     */
 
     public String doRAGChat(String message, String chatId) {
 
