@@ -79,6 +79,7 @@ public class ToolCallAgent extends ReActAgent {
                 if (toolCallList.isEmpty()) {
                     // 只有不调用工具时，才需要手动记录助手消息
                     getMessageList().add(assistantMessage);
+
                     return false;
                 } else {
                     // 需要调用工具时，无需记录助手消息，因为调用工具时会自动记录
