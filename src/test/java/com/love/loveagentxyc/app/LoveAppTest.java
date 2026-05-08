@@ -47,7 +47,16 @@ class LoveAppTest {
     @Test
     void doRAGChat() {
         String chatId = UUID.randomUUID().toString();
-        String message = "我叫肖有财，单身，想找对象";
+        String message = "Java是什么";
         String result = loveApp.doRAGChat(message, chatId);
+    }
+
+    @Test
+    void doRAGChatByStatus() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "我叫肖有财，已婚，婚后夫妻情感不合";
+        String result = loveApp.doRAGChatByStatus(message, chatId, "已婚");
+        System.out.println( result);
+//        String result = loveApp.doRAGChatByStatus(message, chatId);
     }
 }
