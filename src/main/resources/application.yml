@@ -42,3 +42,6 @@ server:
   port: 8123
   servlet:
       context-path: /api
+
+search:
+  apikey: ${BOCHA_SEARCH_API_KEY}
