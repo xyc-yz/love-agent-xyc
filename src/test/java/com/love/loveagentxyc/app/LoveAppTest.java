@@ -63,8 +63,16 @@ class LoveAppTest {
     @Test
     void doChatWithTools() {
         String chatId = UUID.randomUUID().toString();
-        String message = "保存我的恋爱档案为文件";
+        String message = "生成一份‘七夕约会计划’PDF，包含餐厅预订、活动流程和礼物清单";
         String result = loveApp.doChatWithTools(message, chatId);
+        System.out.println( result);
+    }
+
+    @Test
+    void doChatWithMcp() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "我的另一半住在江宁区，翠屏东南，请帮我找到5公里内适合的最近的约会地点";
+        String result = loveApp.doChatWithMcp(message, chatId);
         System.out.println( result);
     }
 }

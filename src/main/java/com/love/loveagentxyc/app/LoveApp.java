@@ -16,6 +16,7 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
@@ -170,9 +171,9 @@ public class LoveApp {
      * 聊天调用工具
      */
     public  String doChatWithTools(String message, String chatId) {
-        String rewriteMessage = queryRewriter.doQueryRewrite(message);
+//        String rewriteMessage = queryRewriter.doQueryRewrite(message);
         ChatResponse chatResponse = chatClient.prompt()
-                .user(rewriteMessage)
+                .user(message)
 //                .system(SYSTEM_PROMPT)
                 .toolCallbacks(tools)
                 .advisors(advisor -> advisor.param(ChatMemory.CONVERSATION_ID, chatId))
@@ -185,6 +186,27 @@ public class LoveApp {
         }
         return "我无法理解你的问题，请重新提问";
     }
+
+    @Resource
+    private ToolCallbackProvider toolCallbackProvider;
+    public  String doChatWithMcp(String message, String chatId) {
+//        String rewriteMessage = queryRewriter.doQueryRewrite(message);
+        ChatResponse chatResponse = chatClient.prompt()
+                .user(message)
+//                .system(SYSTEM_PROMPT)
+                .toolCallbacks(toolCallbackProvider)
+                .advisors(advisor -> advisor.param(ChatMemory.CONVERSATION_ID, chatId))
+                .call()
+                .chatResponse();
+        String text;
+        if (chatResponse != null) {
+            text = chatResponse.getResult().getOutput().getText();
+            return text;
+        }
+        return "我无法理解你的问题，请重新提问";
+    }
+
+
 
 
 }

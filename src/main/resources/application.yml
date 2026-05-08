@@ -12,6 +12,10 @@ spring:
         repository:
           mongodb:  # 这里必须是 mongodb，不是 mongo！
             collection-name: love-agent-memory  # 你的自定义集合名
+    mcp:
+      client:
+        stdio:
+          servers-configuration: classpath:mcp-servers-ignor.json
     dashscope:
       api-key: ${ALIBABA_API_KEY}
       chat:

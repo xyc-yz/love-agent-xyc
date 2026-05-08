@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 ### CUSTOM ###
 applicantion-local.yml
+mcp-server-ignor.json
 ### STS ###
 .apt_generated
 .classpath

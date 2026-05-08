@@ -169,7 +169,7 @@
         </dependency>
 
 
-<!--        pdf-->
+        <!--        pdf-->
 
         <dependency>
             <groupId>com.itextpdf</groupId>
@@ -184,6 +184,16 @@
             <scope>test</scope>
         </dependency>
 
+        <!--        MCP-->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-client</artifactId>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.ai</groupId>-->
+<!--            <artifactId>spring-ai-starter-mcp-client-webflux</artifactId>-->
+<!--        </dependency>-->
 
 
     </dependencies>
