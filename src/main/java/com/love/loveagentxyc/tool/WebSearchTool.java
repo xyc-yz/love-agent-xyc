@@ -7,7 +7,6 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,13 +21,11 @@ public class WebSearchTool {
     // 博查核心搜索接口地址
     private static final String BOCHA_SEARCH_API_URL = "https://api.bochaai.com/v1/web-search";
 
-
     private final String apiKey;
 
     public WebSearchTool(String apiKey) {
         this.apiKey = apiKey;
     }
-
 
     /**
      * 调用博查接口执行恋爱相关内容搜索
@@ -38,12 +35,12 @@ public class WebSearchTool {
     @Tool(description = "Search for love/relationship related information from Bocha AI (博查), support professional emotional guidance retrieval")
     public String searchBocha(
             @ToolParam(description = "Love/relationship related search query keyword (only support love related questions)") String query) {
-        // 1. 构建请求头（鉴权+Content-Type）
+
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put(Header.AUTHORIZATION.getValue(), "Bearer " + apiKey);
         headerMap.put(Header.CONTENT_TYPE.getValue(), "application/json");
 
-        // 2. 构建请求体（按接口文档默认值配置）
+
         JSONObject requestBody = new JSONObject();
         requestBody.put("query", query);          // 搜索关键词（必填）
         requestBody.put("freshness", "noLimit");  // 时间范围：不限（推荐默认值）
@@ -51,38 +48,39 @@ public class WebSearchTool {
         requestBody.put("count", 5);              // 返回5条结果（接口范围1-50）
 
         try {
-            // 3. 发送POST请求调用博查API
+            // 发送POST请求调用博查API
             String responseStr = HttpRequest.post(BOCHA_SEARCH_API_URL)
                     .addHeaders(headerMap)
                     .body(requestBody.toString())
                     .execute()
                     .body();
 
-            // 4. 解析响应结果
+            // 解析响应结果
             JSONObject responseJson = JSONUtil.parseObj(responseStr);
-            
-            // 4.1 校验接口返回状态码
+
+            // 校验接口返回状态码
             int code = responseJson.getInt("code");
             if (code != 200) {
                 String errMsg = responseJson.getStr("msg", "未知错误");
-                return String.format("博查搜索失败：%s，有问题可以联系客服 ", errMsg);
+                return String.format("博查搜索失败，有问题可以联系客服： "+errMsg);
             }
 
-            // 4.2 提取核心网页结果（webPages.value）
+            // 提取核心网页结果
             JSONObject dataObj = responseJson.getJSONObject("data");
             JSONObject webPagesObj = dataObj.getJSONObject("webPages");
             JSONArray webPageValues = webPagesObj.getJSONArray("value");
 
-            // 4.3 处理无结果场景
+            // 处理无结果场景
             if (webPageValues == null || webPageValues.isEmpty()) {
                 return "抱歉，我只能回答恋爱相关的问题，别的没办法帮到您哦，有问题可以联系客服 ";
             }
 
-            // 4.4 提取前5条结果并格式化
-            List<Object> top5Results = webPageValues.size() > 5 
-                    ? webPageValues.subList(0, 5) 
+
+            List<Object> top5Results = webPageValues.size() > 5
+                    ? webPageValues.subList(0, 5)
                     : webPageValues;
-            
+
+            // 去掉分隔线，仅用换行拼接，每条结果独立一段
             String formattedResult = top5Results.stream().map(item -> {
                 JSONObject pageObj = (JSONObject) item;
                 return String.format(
@@ -92,12 +90,11 @@ public class WebSearchTool {
                         pageObj.getStr("url", "无链接"),
                         pageObj.getStr("snippet", "无摘要")
                 );
-            }).collect(Collectors.joining("-------------------------\n"));
+            }).collect(Collectors.joining("\n")); // 仅用换行拼接，去掉分隔线
 
             return formattedResult;
 
         } catch (Exception e) {
-            // 5. 异常捕获（网络/解析/其他）
             return String.format("恋爱相关内容搜索出错：%s，有问题可以联系客服 肖有财", e.getMessage());
         }
     }
