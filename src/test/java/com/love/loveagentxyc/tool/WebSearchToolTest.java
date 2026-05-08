@@ -13,7 +13,7 @@ class WebSearchToolTest {
     @Test
     void searchBocha() {
         WebSearchTool webSearchTool = new WebSearchTool(apiKey);
-        String result = webSearchTool.searchBocha("哈尔滨今天气怎么样");
+        String result = webSearchTool.searchBocha("吵架分手");
         System.out.println(result);
 
     }
