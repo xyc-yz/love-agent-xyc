@@ -53,6 +53,7 @@ public class ToolCallAgent extends ReActAgent {
     }
 
 
+
     @Override
     public boolean think(String conversationId) {
         if (StrUtil.isNotBlank(getNextStepPrompt())) {
