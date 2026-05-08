@@ -15,7 +15,7 @@ spring:
     mcp:
       client:
         stdio:
-          servers-configuration: classpath:mcp-servers-ignor.json
+          servers-configuration: classpath:mcp-server-ignor.json
     dashscope:
       api-key: ${ALIBABA_API_KEY}
       chat:
