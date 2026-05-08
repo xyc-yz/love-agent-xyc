@@ -9,7 +9,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +18,8 @@ import java.util.List;
 public class LoveAppDocumentLoader {
     private final ResourcePatternResolver resourcePatternResolver;
 
+    @jakarta.annotation.Resource
+    private MyKeyWordEnricher myKeyWordEnricher;
 
     public LoveAppDocumentLoader(ApplicationContext ctx) {
         this.resourcePatternResolver = ctx;
@@ -49,6 +50,7 @@ public class LoveAppDocumentLoader {
         } catch (IOException e) {
             log.error("Error loading documents: {}", e.getMessage());
         }
-        return allDocuments;
+        List<Document> splitDocuments = myKeyWordEnricher.enrich(allDocuments);
+        return splitDocuments;
     }
 }
