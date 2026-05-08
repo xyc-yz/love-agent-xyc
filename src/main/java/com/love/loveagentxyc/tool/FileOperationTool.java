@@ -18,7 +18,7 @@ public class FileOperationTool {
         }
     }
 
-    @Tool(description = "写一个文件")
+    @Tool(description = "没要求则不写，写一个文件")
     public String writeFile(
         @ToolParam(description = "文件的名字") String fileName,
         @ToolParam(description = "写入文件的内容") String content) {

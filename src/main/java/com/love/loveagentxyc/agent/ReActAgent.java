@@ -15,14 +15,14 @@ public abstract class ReActAgent extends BaseAgent {
      *
      * @return 是否需要执行行动，true表示需要执行，false表示不需要执行
      */
-    public abstract boolean think();
+    public abstract boolean think(String conversationId);
 
     /**
      * 执行决定的行动
      *
      * @return 行动执行结果
      */
-    public abstract String act();
+    public abstract String act(String conversationId);
 
     /**
      * 执行单个步骤：思考和行动
@@ -30,10 +30,10 @@ public abstract class ReActAgent extends BaseAgent {
      * @return 步骤执行结果
      */
     @Override
-    public String step() {
+    public String step(String conversationId) {
         try {
             // 先思考
-            boolean shouldAct = think();
+            boolean shouldAct = think(conversationId);
             if (!shouldAct) {
                 // 如果不需要行动，检查是否已完成任务
                 if (getState() != AgentState.FINISHED) {
@@ -42,7 +42,7 @@ public abstract class ReActAgent extends BaseAgent {
                 return "思考完成 - 无需行动";
             }
             // 再行动
-            return act();
+            return act(conversationId);
         } catch (Exception e) {
             // 记录异常日志
             e.printStackTrace();

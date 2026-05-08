@@ -17,7 +17,7 @@ import java.io.IOException;
  */
 public class PDFGenerationTool {
 
-    @Tool(description = "根据指定内容生成 PDF 文件", returnDirect = false)
+    @Tool(description = "没要求则不生成，根据指定内容生成 PDF 文件", returnDirect = false)
     public String generatePDF(
             @ToolParam(description = "用于保存生成的 PDF 文件的文件名") String fileName,
             @ToolParam(description = "需纳入 PDF 文件的内容") String content) {

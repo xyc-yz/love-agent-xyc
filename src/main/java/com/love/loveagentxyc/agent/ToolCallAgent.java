@@ -42,18 +42,24 @@ public class ToolCallAgent extends ReActAgent {
         this.toolCallingManager = ToolCallingManager.builder().build();
         // 自己维护选项和消息上下文
         this.chatOptions = DashScopeChatOptions.builder()
-                .internalToolExecutionEnabled(true)
+                .internalToolExecutionEnabled(false)
                 .build();
+        log.info("========== ToolCallAgent 初始化 ==========");
+        log.info("可用工具数量：{}", availableTools.length);
+        for (int i = 0; i < availableTools.length; i++) {
+            log.info("  [{}] 工具名：{}", i + 1, availableTools[i].getToolDefinition().name());
+        }
+        log.info("==========================================");
     }
 
 
     @Override
-    public boolean think() {
+    public boolean think(String conversationId) {
         if (StrUtil.isNotBlank(getNextStepPrompt())) {
             UserMessage userMessage = new UserMessage(getNextStepPrompt());
-            getMessageList().add(userMessage);
+            getMessageList(conversationId).add(userMessage);
         }
-        List<Message> messageList = getMessageList();
+        List<Message> messageList = getMessageList(conversationId);
         Prompt prompt = Prompt.builder()
                 .messages(messageList)
                 .chatOptions(this.chatOptions)
@@ -70,6 +76,7 @@ public class ToolCallAgent extends ReActAgent {
                 String result = assistantMessage.getText();
                 log.info("{}的结果：{}", getName(), result);
                 List<AssistantMessage.ToolCall> toolCallList = assistantMessage.getToolCalls();
+
                 log.info(getName() + "选择了 " + toolCallList.size() + " 个工具来使用");
                 String toolCallInfo = toolCallList.stream()
                         .map(toolCall -> String.format("工具名称：%s，参数：%s", toolCall.name(), toolCall.arguments()))
@@ -78,7 +85,7 @@ public class ToolCallAgent extends ReActAgent {
                 // 如果不需要调用工具，返回 false
                 if (toolCallList.isEmpty()) {
                     // 只有不调用工具时，才需要手动记录助手消息
-                    getMessageList().add(assistantMessage);
+                    getMessageList(conversationId).add(assistantMessage);
 
                     return false;
                 } else {
@@ -90,7 +97,7 @@ public class ToolCallAgent extends ReActAgent {
             }
         } catch (Exception e) {
             AssistantMessage assistantMessage = new AssistantMessage("执行错误：" + e.getMessage());
-            getMessageList().add(assistantMessage);
+            getMessageList(conversationId).add(assistantMessage);
             log.error("{}执行错误：", getName(), e);
             return false;
         }
@@ -100,17 +107,18 @@ public class ToolCallAgent extends ReActAgent {
     }
 
     @Override
-    public String act() {
+    public String act(String conversationId) {
         if (!toolCallChatResponse.hasToolCalls()) {
             return "没有工具需要调用";
         }
         Prompt prompt = Prompt.builder()
-                .messages(getMessageList())
+                .messages(getMessageList(conversationId))
                 .chatOptions(this.chatOptions)
                 .build();
         ToolExecutionResult toolExecutionResult = toolCallingManager.executeToolCalls(prompt, toolCallChatResponse);
 
-        setMessageList(toolExecutionResult.conversationHistory());
+//        setMessageList(toolExecutionResult.conversationHistory());
+        setSessionMemories(toolExecutionResult.conversationHistory(),conversationId);
         ToolResponseMessage toolResponseMessage = (ToolResponseMessage) CollUtil.getLast(toolExecutionResult.conversationHistory());
         // 判断是否调用了终止工具
         boolean terminateToolCalled = toolResponseMessage.getResponses().stream()
