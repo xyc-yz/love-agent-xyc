@@ -59,4 +59,12 @@ class LoveAppTest {
         System.out.println( result);
 //        String result = loveApp.doRAGChatByStatus(message, chatId);
     }
+
+    @Test
+    void doChatWithTools() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "保存我的恋爱档案为文件";
+        String result = loveApp.doChatWithTools(message, chatId);
+        System.out.println( result);
+    }
 }

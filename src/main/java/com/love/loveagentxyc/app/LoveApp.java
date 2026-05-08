@@ -15,10 +15,12 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -27,6 +29,9 @@ import java.util.List;
 public class LoveApp {
     @Resource
     QueryRewriter queryRewriter;
+
+    @Resource
+    private ToolCallback[] tools;
 
     private final ChatClient chatClient;
     private static final String SYSTEM_PROMPT = "扮演深耕恋爱心理领域的专家。开场向用户表明身份，告知用户可倾诉恋爱难题。" +
@@ -114,7 +119,7 @@ public class LoveApp {
      */
 
     public String doRAGChat(String message, String chatId) {
-        message = message +"给我解决方案，并推荐课程及其链接";
+        message = message + "给我解决方案，并推荐课程及其链接";
         String rewriteMessage = queryRewriter.doQueryRewrite(message);
 //        Advisor retrievalAugmentationAdvisor = RetrievalAugmentationAdvisor.builder()
 //                .documentRetriever(VectorStoreDocumentRetriever.builder()
@@ -142,7 +147,7 @@ public class LoveApp {
 
 
     public String doRAGChatByStatus(String message, String chatId, String status) {
-        message = message +"给我解决方案，并推荐课程及其链接";
+        message = message + "给我解决方案，并推荐课程及其链接";
         String rewriteMessage = queryRewriter.doQueryRewrite(message);
         RetrievalAugmentationAdvisor retrievalAugmentationAdvisor = LoveAppRagAdvisorFactory.createLoveAppRagCustomAdvisor(loveAppVectorStore, status);
         ChatResponse chatResponse = chatClient.prompt()
@@ -159,4 +164,27 @@ public class LoveApp {
         }
         return "我无法理解你的问题，请重新提问";
     }
+
+
+    /**
+     * 聊天调用工具
+     */
+    public  String doChatWithTools(String message, String chatId) {
+        String rewriteMessage = queryRewriter.doQueryRewrite(message);
+        ChatResponse chatResponse = chatClient.prompt()
+                .user(rewriteMessage)
+//                .system(SYSTEM_PROMPT)
+                .toolCallbacks(tools)
+                .advisors(advisor -> advisor.param(ChatMemory.CONVERSATION_ID, chatId))
+                .call()
+                .chatResponse();
+        String text;
+        if (chatResponse != null) {
+            text = chatResponse.getResult().getOutput().getText();
+            return text;
+        }
+        return "我无法理解你的问题，请重新提问";
+    }
+
+
 }

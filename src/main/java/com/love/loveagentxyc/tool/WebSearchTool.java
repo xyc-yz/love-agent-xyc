@@ -40,7 +40,7 @@ public class WebSearchTool {
      * @param query 恋爱相关搜索关键词
      * @return 格式化后的前5条目标平台搜索结果，异常时返回提示
      */
-    @Tool(description = "检索恋爱 / 情感相关信息，支持专业情感指导类内容的检索（仅返回百度、哔哩哔哩、知乎、小黑盒内容）")
+    @Tool(description = "检索恋爱 / 情感相关信息，支持情感内容的检索，两性相关内容检索")
     public String searchBocha(
             @ToolParam(description = "恋爱 / 情感相关的搜索查询关键词（仅支持恋爱相关问题）") String query) {
 
@@ -109,18 +109,17 @@ public class WebSearchTool {
                 return "抱歉，未查询到相关恋爱内容，有问题可以联系客服 ";
             }
 
-            // 格式化过滤后的结果（仅用换行拼接）
-            String formattedResult = filteredResults.stream().map(item -> {
-                JSONObject pageObj = (JSONObject) item;
-                return String.format(
-                        "【标题】：%s\n【来源】：%s\n【链接】：%s\n【摘要】：%s......\n",
-                        pageObj.getStr("name", "无标题"),
-                        pageObj.getStr("siteName", "未知网站"),
-                        pageObj.getStr("url", "无链接"),
-                        pageObj.getStr("snippet", "无摘要")
-                );
-            }).collect(Collectors.joining("\n"));
 
+            String formattedResult = filteredResults.stream()
+                    .map(item -> {
+                        JSONObject pageObj = (JSONObject) item;
+                        return pageObj.getStr("name", "无标题") + " "
+                                + pageObj.getStr("siteName", "未知网站") + " "
+                                + pageObj.getStr("url", "无链接") + " "
+                                + pageObj.getStr("snippet", "无摘要");
+                    })
+
+                    .collect(Collectors.joining(", "));
             return formattedResult;
 
         } catch (Exception e) {
