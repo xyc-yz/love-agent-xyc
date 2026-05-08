@@ -19,7 +19,9 @@ public class ToolRegistration {
         ResourceDownloadTool resourceDownloadTool = new ResourceDownloadTool();
         PDFGenerationTool pdfGenerationTool = new PDFGenerationTool();
         FileOperationTool fileOperationTool = new FileOperationTool();
+        TerminateTool terminateTool = new TerminateTool();
         return ToolCallbacks.from(
+                terminateTool,
                 webSearchTool,
                 webScrapingTool,
                 resourceDownloadTool,
