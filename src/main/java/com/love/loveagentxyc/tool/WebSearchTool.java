@@ -15,8 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 博查AI搜索工具（完全对接 https://api.bocha.cn/ 官方接口）
- * 接口文档：https://bocha-ai.feishu.cn/wiki/RXEOw02rFiwzGSkd9mUcqoeAnNK
+ * 博查AI搜索工具
  */
 public class WebSearchTool {
 
@@ -33,8 +32,8 @@ public class WebSearchTool {
 
     /**
      * 调用博查接口执行恋爱相关内容搜索
-     * @param query 恋爱相关搜索关键词（必填）
-     * @return 格式化后的前5条网页搜索结果，异常时返回友好提示
+     * @param query 恋爱相关搜索关键词
+     * @return 格式化后的前5条网页搜索结果，异常时返回提示
      */
     @Tool(description = "Search for love/relationship related information from Bocha AI (博查), support professional emotional guidance retrieval")
     public String searchBocha(
