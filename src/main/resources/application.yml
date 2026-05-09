@@ -1,4 +1,10 @@
 spring:
+  web:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
   datasource:
     url: jdbc:postgresql://localhost:5432/love_ai
     username: postgres

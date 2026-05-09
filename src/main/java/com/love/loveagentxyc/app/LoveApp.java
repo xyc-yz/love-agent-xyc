@@ -209,12 +209,31 @@ public class LoveApp {
 
 
     public Flux<String> doChatByStream(String message, String chatId) {
+        String rewriteMessage = queryRewriter.doQueryRewrite(message);
         return chatClient
                 .prompt()
-                .user(message)
+                .user(rewriteMessage)
+                .system(SYSTEM_PROMPT)
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .stream()
-                .content();
+                .content()
+                .doOnNext(chunk -> log.info("收到 AI 流式内容: {}", chunk));
+    }
+
+
+    public Flux<String> doChatByStreamByRag(String message, String chatId) {
+        message = message + "给我解决方案，并推荐课程及其链接";
+        String rewriteMessage = queryRewriter.doQueryRewrite(message);
+        RetrievalAugmentationAdvisor retrievalAugmentationAdvisor = LoveAppRagAdvisorFactory.createLoveAppRagCustomAdvisor(loveAppVectorStore, null);
+        return chatClient
+                .prompt()
+                .user(rewriteMessage)
+                .system(SYSTEM_PROMPT_RAG)
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
+                .advisors(retrievalAugmentationAdvisor)
+                .stream()
+                .content()
+                .doOnNext(chunk -> log.info("收到 AI 流式内容: {}", chunk));
     }
 
 

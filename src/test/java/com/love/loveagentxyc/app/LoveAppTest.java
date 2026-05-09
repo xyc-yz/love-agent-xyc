@@ -5,6 +5,7 @@ import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.boot.test.context.SpringBootTest;
+import reactor.core.publisher.Flux;
 
 import java.util.UUID;
 
@@ -47,7 +48,7 @@ class LoveAppTest {
     @Test
     void doRAGChat() {
         String chatId = UUID.randomUUID().toString();
-        String message = "Java是什么";
+        String message = "我单身想找女朋友，该怎么办";
         String result = loveApp.doRAGChat(message, chatId);
     }
 
@@ -74,5 +75,21 @@ class LoveAppTest {
         String message = "我的另一半住在江宁区，翠屏东南，请帮我找到5公里内适合的最近的约会地点";
         String result = loveApp.doChatWithMcp(message, chatId);
         System.out.println( result);
+    }
+
+    @Test
+    void doChatByStream() {
+    }
+
+    @Test
+    void doChatByStreamByRag() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "我叫肖有财，单身，想找对象，不知道该怎么做";
+        Flux<String> result = loveApp.doChatByStreamByRag(message, chatId);
+
+        // 阻塞等待流式响应完成
+        result.doOnNext(System.out::print)
+                .doOnComplete(() -> System.out.println("\n=== 流式响应完成 ==="))
+                .blockLast();
     }
 }
