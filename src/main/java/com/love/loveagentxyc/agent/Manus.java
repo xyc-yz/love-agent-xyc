@@ -79,7 +79,7 @@ public class Manus extends ToolCallAgent{
                 - 若用户要求生成PDF，只需生成PDF即可，无需额外多余操作。
                 """;
         this.setNextStepPrompt(NEXT_STEP_PROMPT);
-        this.setMaxSteps(20);
+        this.setMaxSteps(50);
         // 初始化 AI 对话客户端
         ChatClient chatClient = ChatClient.builder(dashScopeChatModel)
                 .defaultAdvisors(

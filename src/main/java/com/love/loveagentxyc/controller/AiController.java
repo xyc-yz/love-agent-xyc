@@ -113,9 +113,9 @@ public class AiController {
      * @return
      */
     @GetMapping(value = "/manus/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
-    public SseEmitter doChatWithManus(String message,String conversationId) {
+    public String doChatWithManus(String message,String conversationId) {
         Manus manus = new Manus(allTools, (DashScopeChatModel) dashscopeChatModel);
-        return manus.runStream(message, conversationId);
+        return manus.run(message, conversationId);
     }
 
 

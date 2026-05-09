@@ -123,12 +123,9 @@ public abstract class BaseAgent {
      * @param userPrompt 用户提示词
      * @return 执行结果
      */
-    public SseEmitter runStream(String userPrompt,String conversationId) {
-        // 创建一个超时时间较长的 SseEmitter
-        SseEmitter sseEmitter = new SseEmitter(300000L); // 5 分钟超时
-        // 使用线程异步处理，避免阻塞主线程
+    public SseEmitter runStream(String userPrompt, String conversationId) {
+        SseEmitter sseEmitter = new SseEmitter(300000L);
         CompletableFuture.runAsync(() -> {
-            // 1、基础校验
             try {
                 if (this.state != AgentState.IDLE) {
                     sseEmitter.send("错误：无法从状态运行代理：" + this.state);
@@ -143,33 +140,36 @@ public abstract class BaseAgent {
             } catch (Exception e) {
                 sseEmitter.completeWithError(e);
             }
-            // 2、执行，更改状态
-            this.state = AgentState.RUNNING;
-            // 记录消息上下文
 
+            this.state = AgentState.RUNNING;
             getMessageList(conversationId).add(new UserMessage(userPrompt));
-            // 保存结果列表
             List<String> results = new ArrayList<>();
+
             try {
-                // 执行循环
                 for (int i = 0; i < maxSteps && state != AgentState.FINISHED; i++) {
                     int stepNumber = i + 1;
                     currentStep = stepNumber;
                     log.info("Executing step {}/{}", stepNumber, maxSteps);
-                    // 单步执行
+
                     String stepResult = step(conversationId);
                     String result = "Step " + stepNumber + ": " + stepResult;
                     results.add(result);
-                    // 输出当前每一步的结果到 SSE
                     sseEmitter.send(result);
+
+                    // 检测终止信号
+                    if (stepResult != null && (stepResult.contains("terminate") || stepResult.contains("任务完成"))) {
+                        state = AgentState.FINISHED;
+                        log.info("检测到终止信号，提前结束");
+                        break;
+                    }
                 }
-                // 检查是否超出步骤限制
+
                 if (currentStep >= maxSteps) {
                     state = AgentState.FINISHED;
-                    results.add("Terminated: Reached max steps (" + maxSteps + ")");
                     sseEmitter.send("执行结束：达到最大步骤（" + maxSteps + "）");
+                    log.warn("达到最大步骤限制，强制结束");
                 }
-                // 正常完成
+
                 sseEmitter.complete();
             } catch (Exception e) {
                 state = AgentState.ERROR;
@@ -181,18 +181,16 @@ public abstract class BaseAgent {
                     sseEmitter.completeWithError(ex);
                 }
             } finally {
-                // 3、清理资源
                 this.cleanup();
             }
         });
 
-        // 设置超时回调
         sseEmitter.onTimeout(() -> {
             this.state = AgentState.ERROR;
             this.cleanup();
             log.warn("SSE connection timeout");
         });
-        // 设置完成回调
+
         sseEmitter.onCompletion(() -> {
             if (this.state == AgentState.RUNNING) {
                 this.state = AgentState.FINISHED;
@@ -200,6 +198,7 @@ public abstract class BaseAgent {
             this.cleanup();
             log.info("SSE connection completed");
         });
+
         return sseEmitter;
     }
 
