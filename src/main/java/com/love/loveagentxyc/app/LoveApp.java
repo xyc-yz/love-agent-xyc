@@ -20,6 +20,7 @@ import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 
 import java.util.Collections;
 import java.util.List;
@@ -204,6 +205,16 @@ public class LoveApp {
             return text;
         }
         return "我无法理解你的问题，请重新提问";
+    }
+
+
+    public Flux<String> doChatByStream(String message, String chatId) {
+        return chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
+                .stream()
+                .content();
     }
 
 
