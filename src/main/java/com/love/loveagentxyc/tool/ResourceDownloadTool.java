@@ -18,7 +18,7 @@ public class ResourceDownloadTool {
             FileUtil.mkdir(fileDir);
             // 使用 Hutool 的 downloadFile 方法下载资源
             HttpUtil.downloadFile(url, new File(filePath));
-            return "资源保存成功至: " + filePath;
+            return "资源保存成功。\n" + DownloadLinkBuilder.hintLine("download", fileName);
         } catch (Exception e) {
             return "Error downloading resource: " + e.getMessage();
         }

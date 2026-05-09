@@ -177,11 +177,11 @@
             <version>9.1.0</version>
             <type>pom</type>
         </dependency>
+        <!-- iText 亚洲字体（中文 PDF 必需）；此前为 test 导致运行时无法加载 STSong 等字体 -->
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>font-asian</artifactId>
             <version>9.1.0</version>
-            <scope>test</scope>
         </dependency>
 
         <!--        MCP-->

@@ -17,7 +17,7 @@ import java.io.IOException;
  */
 public class PDFGenerationTool {
 
-    @Tool(description = "没要求则不生成，根据指定内容生成 PDF 文件", returnDirect = false)
+    @Tool(description = "没要求则不生成，根据指定内容生成 PDF。返回里「下载URL」开头的 http:// 整行地址可直接复制到浏览器下载，勿改写主机名或改成 https://api/", returnDirect = false)
     public String generatePDF(
             @ToolParam(description = "用于保存生成的 PDF 文件的文件名") String fileName,
             @ToolParam(description = "需纳入 PDF 文件的内容") String content) {
@@ -28,17 +28,31 @@ public class PDFGenerationTool {
             try (PdfWriter writer = new PdfWriter(filePath);
                  PdfDocument pdf = new PdfDocument(writer);
                  Document document = new Document(pdf)) {
-                // 使用内置中文字体
-                PdfFont font = PdfFontFactory.createFont("STSongStd-Light", "UniGB-UCS2-H");
+                // 依赖 font-asian（运行时 classpath）；优先 STSong-Light，与部分环境下 STSongStd-Light 注册名不一致有关
+                PdfFont font = createChineseFont();
                 document.setFont(font);
                 // 创建段落
                 Paragraph paragraph = new Paragraph(content);
                 // 添加段落并关闭文档
                 document.add(paragraph);
             }
-            return "PDF生成成功到: " + filePath;
+            return "PDF已生成。\n" + DownloadLinkBuilder.hintLine("pdf", fileName);
         } catch (IOException e) {
             return "PDF 生成失败: " + e.getMessage();
         }
+    }
+
+    private static PdfFont createChineseFont() throws IOException {
+        IOException last = null;
+        for (String fontProgramName : new String[] {"STSong-Light", "STSongStd-Light"}) {
+            try {
+                return PdfFontFactory.createFont(fontProgramName, "UniGB-UCS2-H");
+            } catch (IOException e) {
+                last = e;
+            }
+        }
+        throw last != null
+                ? last
+                : new IOException("无法加载中文字体，请确认依赖 com.itextpdf:font-asian 已加入运行时 classpath");
     }
 }

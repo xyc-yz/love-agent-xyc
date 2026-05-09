@@ -5,6 +5,7 @@ import com.love.loveagentxyc.agent.model.AgentState;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -102,14 +103,7 @@ public abstract class BaseAgent {
             // 3、清理资源并返回最终结果
             this.cleanup();
 
-            // 返回该会话最后一条 AI 的回复（过滤掉工具调用产生的中间 JSON）
-            List<Message> history = getMessageList(conversationId);
-            for (int i = history.size() - 1; i >= 0; i--) {
-                if (history.get(i) instanceof org.springframework.ai.chat.messages.AssistantMessage) {
-                    return history.get(i).getText();
-                }
-            }
-            return "执行完成";
+            return extractFinalAssistantText(conversationId);
         } catch (Exception e) {
             state = AgentState.ERROR;
             log.error("智能体错误：", e);
@@ -118,7 +112,25 @@ public abstract class BaseAgent {
     }
 
     /**
+     * 从历史中取「面向用户的」最终助手文本：自后向前跳过仅有工具调用、无正文的 AssistantMessage。
+     */
+    protected String extractFinalAssistantText(String conversationId) {
+        List<Message> history = getMessageList(conversationId);
+        for (int i = history.size() - 1; i >= 0; i--) {
+            Message msg = history.get(i);
+            if (msg instanceof AssistantMessage am) {
+                String text = am.getText();
+                if (StrUtil.isNotBlank(text)) {
+                    return text;
+                }
+            }
+        }
+        return "执行完成";
+    }
+
+    /**
      * 运行代理（流式输出）
+     * <p>不在 SSE 中推送每步工具原始 JSON，执行结束后只推送与 {@link #run(String, String)} 相同的最终助手回复。
      *
      * @param userPrompt 用户提示词
      * @return 执行结果
@@ -143,7 +155,6 @@ public abstract class BaseAgent {
 
             this.state = AgentState.RUNNING;
             getMessageList(conversationId).add(new UserMessage(userPrompt));
-            List<String> results = new ArrayList<>();
 
             try {
                 for (int i = 0; i < maxSteps && state != AgentState.FINISHED; i++) {
@@ -152,9 +163,10 @@ public abstract class BaseAgent {
                     log.info("Executing step {}/{}", stepNumber, maxSteps);
 
                     String stepResult = step(conversationId);
-                    String result = "Step " + stepNumber + ": " + stepResult;
-                    results.add(result);
-                    sseEmitter.send(result);
+                    // 不再将 step 结果（含工具返回的大段 JSON）推给前端，仅打日志
+                    if (log.isDebugEnabled()) {
+                        log.debug("Step {} 内部结果: {}", stepNumber, stepResult);
+                    }
 
                     // 检测终止信号
                     if (stepResult != null && (stepResult.contains("terminate") || stepResult.contains("任务完成"))) {
@@ -166,10 +178,12 @@ public abstract class BaseAgent {
 
                 if (currentStep >= maxSteps) {
                     state = AgentState.FINISHED;
-                    sseEmitter.send("执行结束：达到最大步骤（" + maxSteps + "）");
                     log.warn("达到最大步骤限制，强制结束");
                 }
 
+                this.cleanup();
+                String finalText = extractFinalAssistantText(conversationId);
+                sseEmitter.send(finalText);
                 sseEmitter.complete();
             } catch (Exception e) {
                 state = AgentState.ERROR;
@@ -180,8 +194,6 @@ public abstract class BaseAgent {
                 } catch (IOException ex) {
                     sseEmitter.completeWithError(ex);
                 }
-            } finally {
-                this.cleanup();
             }
         });
 

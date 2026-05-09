@@ -27,7 +27,7 @@ public class FileOperationTool {
             // 创建目录
             FileUtil.mkdir(FILE_DIR);
             FileUtil.writeUtf8String(content, filePath);
-            return "文件写入成功: " + filePath;
+            return "文件写入成功。\n" + DownloadLinkBuilder.hintLine("file", fileName);
         } catch (Exception e) {
             return "文件写入失败: " + e.getMessage();
         }

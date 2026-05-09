@@ -7,12 +7,10 @@ import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 
@@ -107,15 +105,15 @@ public class AiController {
     }
 
     /**
-     * 流式调用 Manus 超级智能体
+     * SSE 流式调用 Manus 超级智能体（按步骤推送中间结果）
      *
      * @param message
-     * @return
+     * @param conversationId 会话 ID
      */
-    @GetMapping(value = "/manus/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
-    public String doChatWithManus(String message,String conversationId) {
+    @GetMapping(value = "/manus/chat")
+    public SseEmitter doChatWithManus(String message, String conversationId) {
         Manus manus = new Manus(allTools, (DashScopeChatModel) dashscopeChatModel);
-        return manus.run(message, conversationId);
+        return manus.runStream(message, conversationId);
     }
 
 

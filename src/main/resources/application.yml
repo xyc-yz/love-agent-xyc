@@ -55,3 +55,7 @@ server:
 
 search:
   apikey: ${BOCHA_SEARCH_API_KEY}
+
+# 浏览器访问本服务的根地址（无路径后缀）。工具生成的下载链接会拼成：{download-base-url}/api/files/download/...
+app:
+  download-base-url: http://localhost:8123
